@@ -16,8 +16,13 @@ jobs:
 
       - name: Extract game project
         run: |
-          mkdir game
-          unzip -o "ZombieBeatFighter APK Fixed.zip" -d game
+          mkdir -p game
+          unzip -o "ZombieBeatFighter_APK_Fixed.zip" -d game
+
+      - name: Show extracted files
+        run: |
+          echo "Extracted project:"
+          find game -maxdepth 2 -type f | sort
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -26,16 +31,21 @@ jobs:
           java-version: '17'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: '8.2'
+          gradle-version: '8.4'
 
       - name: Build APK
-        working-directory: game
-        run: gradle assembleDebug
+        working-directory: game/ZombieBeatFighter
+        run: gradle assembleDebug --stacktrace
+
+      - name: Check APK
+        run: |
+          ls -lh game/ZombieBeatFighter/app/build/outputs/apk/debug/
+          test -f game/ZombieBeatFighter/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ZombieBeatFighter-APK
-          path: game/app/build/outputs/apk/debug/app-debug.apk
+          path: game/ZombieBeatFighter/app/build/outputs/apk/debug/app-debug.apk
